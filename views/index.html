@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .date-display {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .predictions {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+            gap: 20px;
+        }
+        
+        .digit-box {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .digit-label {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .digit-value {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+        
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #c33;
+        }
+        
+        .add-result-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .history-section {
+            margin-top: 30px;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Digit Predictor</h1>
+        <div class="date-display" id="currentDate">Loading...</div>
+        
+        <div id="content">
+            <div class="loading">Loading predictions...</div>
+        </div>
+        
+        <div class="add-result-section">
+            <h2>Add Actual Results</h2>
+            <form id="resultsForm">
+                <div class="form-group">
+                    <label for="resultDate">Date:</label>
+                    <input type="date" id="resultDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="resultDigit1">Digit 1 (1-200):</label>
+                    <input type="number" id="resultDigit1" min="1" max="200" required>
+                </div>
+                <div class="form-group">
+                    <label for="resultDigit2">Digit 2 (1-200):</label>
+                    <input type="number" id="resultDigit2" min="1" max="200" required>
+                </div>
+                <button type="submit" class="btn">Save Results</button>
+            </form>
+            <div id="saveMessage"></div>
+        </div>
+        
+        <div class="history-section">
+            <h2>Recent History</h2>
+            <div id="historyContent">
+                <div class="loading">Loading history...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Display current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('resultDate').valueAsDate = now;
+        }
+
+        // Fetch and display predictions
+        async function loadPredictions() {
+            try {
+                const response = await fetch('/api/predictions');
+                const data = await response.json();
+                
+                const content = `
+                    <div class="predictions">
+                        <div class="digit-box">
+                            <div class="digit-label">Predicted Digit 1</div>
+                            <div class="digit-value">${data.digit1}</div>
+                        </div>
+                        <div class="digit-box">
+                            <div class="digit-label">Predicted Digit 2</div>
+                            <div class="digit-value">${data.digit2}</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>Analysis:</strong> ${data.message}</p>
+                        <p><strong>Data Points:</strong> ${data.dataPoints} days of historical data analyzed</p>
+                    </div>
+                `;
+                
+                document.getElementById('content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> Failed to load predictions. Please make sure the database is configured properly.
+                    </div>
+                `;
+            }
+        }
+
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history?limit=10');
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    document.getElementById('historyContent').innerHTML = '<p>No historical data available yet.</p>';
+                    return;
+                }
+                
+                let tableHTML = `
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Digit 1</th>
+                                <th>Digit 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.forEach(record => {
+                    const date = new Date(record.date).toLocaleDateString();
+                    tableHTML += `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${record.digit1}</td>
+                            <td>${record.digit2}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += '</tbody></table>';
+                document.getElementById('historyContent').innerHTML = tableHTML;
+            } catch (error) {
+                document.getElementById('historyContent').innerHTML = '<p class="error">Failed to load history.</p>';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('resultsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('resultDate').value;
+            const digit1 = parseInt(document.getElementById('resultDigit1').value);
+            const digit2 = parseInt(document.getElementById('resultDigit2').value);
+            
+            try {
+                const response = await fetch('/api/results', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date, digit1, digit2 }),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('saveMessage').innerHTML = `
+                        <div class="info-box" style="margin-top: 15px; border-left-color: #28a745;">
+                            <p style="color: #28a745;"><strong>Success!</strong> Results saved successfully.</p>
+                        </div>
+                    `;
+                    // Reload predictions and history
+                    loadPredictions();
+                    loadHistory();
+                    // Clear form
+                    document.getElementById('resultDigit1').value = '';
+                    document.getElementById('resultDigit2').value = '';
+                } else {
+                    document.getElementById('saveMessage').innerHTML = `
+                        <div class="error" style="margin-top: 15px;">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('saveMessage').innerHTML = `
+                    <div class="error" style="margin-top: 15px;">
+                        <strong>Error:</strong> Failed to save results.
+                    </div>
+                `;
+            }
+        });
+
+        // Initialize
+        updateCurrentDate();
+        loadPredictions();
+        loadHistory();
+    </script>
+</body>
+</html>

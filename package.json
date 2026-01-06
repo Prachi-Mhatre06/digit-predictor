@@ -1,0 +1,23 @@
+{
+  "name": "digit-predictor",
+  "version": "1.0.0",
+  "description": "Express app to predict two digits based on historical data",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node scripts/initDb.js"
+  },
+  "keywords": ["express", "prediction", "postgres"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
