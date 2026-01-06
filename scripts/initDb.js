@@ -10,8 +10,8 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS daily_digits (
         id SERIAL PRIMARY KEY,
         date DATE NOT NULL UNIQUE,
-        digit1 INTEGER NOT NULL CHECK (digit1 >= 1 AND digit1 <= 200),
-        digit2 INTEGER NOT NULL CHECK (digit2 >= 1 AND digit2 <= 200),
+        digit1 INTEGER NOT NULL CHECK (digit1 >= 0 AND digit1 <= 1000),
+        digit2 INTEGER NOT NULL CHECK (digit2 >= 0 AND digit2 <= 1000),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       

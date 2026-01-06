@@ -199,12 +199,12 @@
                     <input type="date" id="resultDate" required>
                 </div>
                 <div class="form-group">
-                    <label for="resultDigit1">Digit 1 (1-200):</label>
-                    <input type="number" id="resultDigit1" min="1" max="200" required>
+                    <label for="resultDigit1">Digit 1 (0-1000):</label>
+                    <input type="number" id="resultDigit1" min="0" max="1000" required>
                 </div>
                 <div class="form-group">
-                    <label for="resultDigit2">Digit 2 (1-200):</label>
-                    <input type="number" id="resultDigit2" min="1" max="200" required>
+                    <label for="resultDigit2">Digit 2 (0-1000):</label>
+                    <input type="number" id="resultDigit2" min="0" max="1000" required>
                 </div>
                 <button type="submit" class="btn">Save Results</button>
             </form>
@@ -234,6 +234,11 @@
                 const response = await fetch('/api/predictions');
                 const data = await response.json();
                 
+                const insightsHTML = data.insights ? `
+                        <p><strong>Recent 30-Day Avg:</strong> Digit1=${data.insights.recentAvg1}, Digit2=${data.insights.recentAvg2}</p>
+                        <p><strong>Day of Week:</strong> ${data.insights.dayOfWeek}</p>
+                    ` : '';
+                
                 const content = `
                     <div class="predictions">
                         <div class="digit-box">
@@ -247,7 +252,8 @@
                     </div>
                     <div class="info-box">
                         <p><strong>Analysis:</strong> ${data.message}</p>
-                        <p><strong>Data Points:</strong> ${data.dataPoints} days of historical data analyzed</p>
+                        <p><strong>Data Points:</strong> ${data.dataPoints || 0} days of historical data analyzed</p>
+                        ${insightsHTML}
                     </div>
                 `;
                 

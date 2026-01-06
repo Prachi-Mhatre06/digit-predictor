@@ -27,9 +27,9 @@ const startServer = async () => {
     console.log('Initializing database...');
     await createTables();
     
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server is running on http://0.0.0.0:${PORT}`);
-      console.log(`Database: ${process.env.DB_NAME || process.env.PGDATABASE || 'railway'}`);
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Database: ${process.env.DB_NAME}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
