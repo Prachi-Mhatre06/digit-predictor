@@ -239,21 +239,26 @@
                         <p><strong>Day of Week:</strong> ${data.insights.dayOfWeek}</p>
                     ` : '';
                 
+                // Check if this is actual data or prediction
+                const isActual = data.isActual === true;
+                const label1 = isActual ? 'Actual Digit 1' : 'Predicted Digit 1';
+                const label2 = isActual ? 'Actual Digit 2' : 'Predicted Digit 2';
+                
                 const content = `
                     <div class="predictions">
                         <div class="digit-box">
-                            <div class="digit-label">Predicted Digit 1</div>
+                            <div class="digit-label">${label1}</div>
                             <div class="digit-value">${data.digit1}</div>
                         </div>
                         <div class="digit-box">
-                            <div class="digit-label">Predicted Digit 2</div>
+                            <div class="digit-label">${label2}</div>
                             <div class="digit-value">${data.digit2}</div>
                         </div>
                     </div>
                     <div class="info-box">
-                        <p><strong>Analysis:</strong> ${data.message}</p>
-                        <p><strong>Data Points:</strong> ${data.dataPoints || 0} days of historical data analyzed</p>
-                        ${insightsHTML}
+                        <p><strong>${isActual ? '✅ Status' : 'Analysis'}:</strong> ${data.message}</p>
+                        ${!isActual ? `<p><strong>Data Points:</strong> ${data.dataPoints || 0} days of historical data analyzed</p>` : ''}
+                        ${!isActual ? insightsHTML : ''}
                     </div>
                 `;
                 

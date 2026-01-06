@@ -136,22 +136,49 @@ class PredictionService {
    */
   async getPredictions() {
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Check if today's data already exists
+      const existingData = await pool.query(
+        'SELECT * FROM daily_digits WHERE date = $1',
+        [today]
+      );
+      
+      if (existingData.rows.length > 0) {
+        // Today's actual data exists, return it instead of predictions
+        const actual = existingData.rows[0];
+        return {
+          date: today,
+          digit1: actual.digit1,
+          digit2: actual.digit2,
+          isActual: true,
+          message: 'Actual results for today (no prediction needed)',
+          dataPoints: 0
+        };
+      }
+      
+      // No data for today, generate predictions
       const historicalData = await this.getHistoricalData();
-      const today = new Date();
-      const dayOfWeek = today.getDay();
+      const todayDate = new Date();
+      const dayOfWeek = todayDate.getDay();
       
       const prediction1 = this.predictDigit(historicalData, 'digit1', dayOfWeek);
       const prediction2 = this.predictDigit(historicalData, 'digit2', dayOfWeek);
 
       // Calculate confidence metrics
       const recentData = historicalData.slice(0, 30);
-      const avg1 = recentData.reduce((sum, row) => sum + row.digit1, 0) / recentData.length;
-      const avg2 = recentData.reduce((sum, row) => sum + row.digit2, 0) / recentData.length;
+      const avg1 = recentData.length > 0 
+        ? recentData.reduce((sum, row) => sum + row.digit1, 0) / recentData.length 
+        : 0;
+      const avg2 = recentData.length > 0
+        ? recentData.reduce((sum, row) => sum + row.digit2, 0) / recentData.length
+        : 0;
 
       return {
-        date: today.toISOString().split('T')[0],
+        date: today,
         digit1: prediction1,
         digit2: prediction2,
+        isActual: false,
         dataPoints: historicalData.length,
         insights: {
           recentAvg1: Math.round(avg1),
